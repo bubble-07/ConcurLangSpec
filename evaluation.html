@@ -1,0 +1,65 @@
+<!doctype HTML>
+<html>
+<head>
+<link rel="icon" type="image/ico" href="images/concurlogoscaled.ico"/>
+<link rel="stylesheet" type="text/css" href="style.css" />
+<title>Concur Spec: Evaluation</title>
+</head>
+<body>
+<h1 style="font-size:36px;">
+    <a href="concur.html">
+    <img alt="Concur Logo" src="images/concurtextlogo.png" style="width:128px;height:48px;">
+    </a>
+    Evaluation
+</h1>
+<hr />
+<h2 class="logoed">Overview</h2>
+    Concur is unlike most languages in that evaluation is required to simulate parallel
+    evaluation of all arguments to functions and the bodies of functions. This comes as
+    a result of Concur using lazy-future evaluation. Any implementation of Concur is
+    required to at least implement lazy evaluation or any form of evaluation with the same
+    semantics as lazy evaluation. However, the semantics of constructs in Concur are 
+    required to have the same behavior under lazy evaluation and lazy-future evaluation.
+    In addition, at the time of writing, it is recommended for implementations to experiment
+    with lazy-future evaluation, where applicable. Given the correct architecture, it may
+    be possible to take advantage of implicit parallelism wherever it appears.
+<h2 class=logoed">Lazy Evaluation</h2>
+    Under lazy evaluation, a function application is evaluated by binding all of the
+    expressions for arguments to the parameters as "thunks", or expressions yet to be
+    evaluated. Once these thunks are bound, execution continues from inside the body of
+    the function. This process continues until a function is encountered that is either a
+    primitive or a function with strictness annotations, in which case the arguments are
+    evaluated immediately under "strict" evaluation. Lazy evaluation has the benefits of
+    allowing the implicit construction of lazy, infinite lists and it can occasionally
+    be exploited to improve the runtimes of programs without losing expressiveness. 
+    However, lazy evaluation is sometimes difficult to reason about in performance
+    and it is inherently sequential. However, the gains in expressiveness and the
+    requirements on functional purity make lazy evaluation a good choice for a functional
+    language like Concur. Concur implementations are required to implement lazy evaluation
+    at a minimum.
+<h2 class=logoed">Lazy Future Evaluation</h2>
+    Lazy future evaluation is like lazy evaluation, but instead of each argument being
+    bound into a thunk that is evaluated only when needed, each argument to every function
+    is bound to a separate thread of execution, and the parameters inside the body of the
+    function are bound to something that references the correct thread of execution. These
+    threads may be garbage-collected at will, with the primary thread being the root node.
+    When a function is encountered [a foreign function or a primitive] that requires its
+    arguments to be evaluated before proceeding, the thread of execution evaluating
+    the function application must wait until all of the threads computing the arguments
+    have completed and returned results to continue. <br />
+    Lazy future evaluation exploits implicit parallelism incredibly well. However, due to
+    the large number of threads created and blocked, performance is a concern. 
+    The recommendation is to combine lazy future evaluation with lazy evaluation by
+    switching to lazy evaluation in each thread when no gains are to be made by lazy
+    future evaluation. [This strategy is easier in an interpreter or a JIT compiler, but
+    it may be possible in a compiler, but this is pure speculation. Research must
+    be done in the area.]
+<hr />
+<h6>
+<a href="concur.html">
+    <img alt="Concur Logo" src="images/concurtextlogo.png" style="width:64px;height:24px;">
+    <br />
+    Back to Main Page
+</a>
+</h6>
+</body>

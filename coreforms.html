@@ -1,0 +1,241 @@
+<!doctype HTML>
+<html>
+<head>
+<link rel="icon" type="image/ico" href="images/concurlogoscaled.ico"/>
+<link rel="stylesheet" type="text/css" href="style.css" />
+<title>Concur Spec: Core Forms</title>
+</head>
+<body>
+<h1 style="font-size:36px;">
+    <a href="concur.html">
+    <img alt="Concur Logo" src="images/concurtextlogo.png" style="width:128px;height:48px;">
+    </a>
+    Core Forms
+</h1>
+<hr />
+<h2 class="logoed">
+    Overview
+</h2>
+    Core forms in Concur are defined as functions and operations that are central to the language.
+    There are two categories of core forms: elementary core forms and derived core forms.
+    But first,
+<h2 class="logoed">
+    Definitions
+</h2>
+    <h3>Expressions</h3>
+        An <dfn>expression</dfn> is any valid S-expression, literal or identifier. [see "Syntax"]
+    <h3>Parameters</h3>
+        A <dfn>parameter</dfn> is syntatically either an identifier or a S-expression
+        pair of the form: <code>(<var>type</var> <var>name</var>)</code> 
+        Where "<var>type</var>" is any valid type or placeholder [see "Type System"]
+        and "<var>name</var>" is any valid identifier.
+<h2 class="logoed">
+    Elementary Core Forms
+</h2>
+    <h3>Overview</h3>
+        Elementary Core Forms are the absolute core of Concur. They are general operations
+        and constructs that cannot be expressed through other constructs in the language.
+    <h3>Lambda</h3>
+        Syntax: <code>(lambda ([<var>rettype</var>] <var>param<sub>1</sub></var> 
+         [... <var>param<sub>n</sub></var>]) <var>body</var>)  OR  
+         (lambda <var>param<sub>1</sub></var> body)<br /></code>
+         Where each "<var>param</var>" is a valid parameter and
+         "<var>body</var>" is a valid expression.<br />
+        Alias: <code>\</code> <br /><br />
+        "Lambda" creates an anonymous function with optionally typed parameters
+        as arguments that returns the body of the expression with the values of the
+        parameters [arguments] bound to their names. Parameters in the body of a lambda
+        are bound to the values of the parameters of the innermost lambda expression.
+        The type of a function created with lambda is typeof(param<sub>1</sub>) -&gt;
+        ... typeof(param<sub>n</sub>) -&gt; rettype.
+        For more detailed information on "Lambdas", see 
+        <a href="http://en.wikipedia.org/wiki/Lambda_calculus">Wikipedia</a>, and see
+        "Evaluation" for more detail about how expressions are evaluated in Concur.
+        <br /><br />
+        Examples: <br />
+            <code>(lambda (int (int x)) (x + 1)) 5</code>
+            <code class="smallarrow">&#8594;</code><code>6</code><br />
+            <code>lambda( ( (a -&gt; (a -&gt; b)) f) (a x),f x x) + 2</code>
+            <code class="smallarrow">&#8594;</code><code>6</code><br />
+            <code>\(x,x x) \(x,x x)</code>
+            <code class="smallarrow">&#8594;</code>[doesn't terminate]
+    <h3>Namespace</h3>
+        Syntax: <code>(namespace <var>name</var> <var>decl<sub>1</sub></var> [...])
+        </code><br />Where "<var>name</var>" is any valid identifier that gives a name
+        to the namespace, and each "<var>decl</var>" is any valid declaration <br /> <br />
+        A namespace [also known as a module] 
+        consists of a name tagged to a set of declarations. The "namespace"
+        keyword itself forms a declaration, allowing namespaces to be nested. A declaration
+        consists of a name and what it equates to. Every file written in Concur source
+        text is implicitly within a <code>(namespace <var>filename</var>
+        <var>code</var>)</code> block. <br />
+        Members of a namespace [declarations] can be accessed through putting the name of
+        a namespace, followed by a dot, followed by the name of the member. The member can
+        be thought of as actually being a function that takes a namespace as its argument
+        and returns the value of the declaration.
+    <h3>Declare</h3>
+        Syntax: <code>(declare <var>name</var> <var>value</var>)</code> <br />
+        Alias: <code>decl</code> <br /> <br />
+        "Declare" creates a declaration where "<var>name</var>" is assigned to 
+        "<var>value</var>". Declarations can only exist within a namespace.
+        The innermost namespace with "name" gives it its value in an expression.
+        If multiple declarations exist with the same name, the latest declaration's
+        value is what the value actually is, and all other declarations of that name
+        may be discarded, with the exception of a value that is a function, in which
+        case a function is being defined through ad-hoc polymorphism. [see "Types#adhoc"]
+        A file's "main" function is where a program begins executing. [more on that later]
+        <br />Examples:
+<pre>decl double
+     lambda x
+        + x x
+decl main
+     print double(2)</pre><code class="smallarrow">&#8594;</code><code>4</code>
+        <br />
+<pre>namespace messages
+    namespace greetings
+        declare hello "Hello, World!"
+declare main
+    print (hello (greetings messages)) #OR messages.greetings.hello
+</pre><code class="smallarrow">&#8594;</code><code>"Hello, World!"</code>
+
+<pre>decl x 10
+decl main
+    print x
+decl x 20</pre><code class="smallarrow">&#8594;</code><code>20</code>
+
+    <h3>Import</h3>
+        Syntax: <code>(import <var>module</var>)  OR
+        (import <var>name</var> <var>filepath</var>)</code> <br /><br />
+        "Import" effectively expands the file referenced by "<var>filepath</var>" [a string]
+        into the current source file, but nested inside of namespace "<var>name</var>"[an identifier].
+        With the single-argument form of import, the filename is "<var>module</var>",
+        and the name of the resulting namespace is "<var>name</var>". Modules should
+        be searched for in the directory of the file, the directory for user-specific
+        modules [if applicable], and the directory for system-specific modules [if
+        applicable]. Default search paths are implementation-dependent. However, importing
+        explicitly from a given file path is required to at least support the form
+        "~/dir", where ~ is a placeholder for the current directory. <br />
+        Examples: <br />
+<pre>// in file "messages.cur"
+namespace greetings
+    declare hello "Hello, World!"
+
+// in file "main.cur"
+import messages  //alternatively, import messages "~/messages.cur"
+decl main
+     print messages.greetings.hello
+</pre>
+
+    <h3>Importall</h3>
+        Syntax: (same as import) <br />
+        "Importall" is the same as "import", but instead of packaging everything into
+        the file namespace, everything is unpackaged, which means that top-level
+        definitions in the imported file will be usable without needing to specify that
+        they are from the file. <br />
+        Example (builds off previous example): <br />
+<pre>// in file "main.cur"
+importall messages
+decl main
+     print greetings.hello
+</pre>
+
+    <h3>If</h3>
+        Syntax:<code> (if <var>condition</var> <var>val<sub>true</sub></var> 
+        <var>val<sub>false</sub></var>)</code><br />
+        "if" is a function that takes a <var>condition</var> and if it's true,
+        it returns <var>val<sub>true</sub></var>, and if it's false, it returns
+        <var>val<sub>false</sub></var>. Note that the "else" condition [as it would
+        be known in other languages], is mandatory, because all functions must have
+        a return value. 
+        
+        Due to the evaluation scheme of Concur,
+        "if" reduces as soon as "condition" can be determined to be either true
+        or false, but both branches can be partially evaluated in any case. 
+        For why this doesn't have any effect on the ordering of effects, see
+        Langspec#Effect Mechanism.<br />
+        Example:<br />
+<pre>
+decl factorial
+     lambda n
+            if n = 0
+               1
+               n * factorial(n - 1)
+decl main
+     print factorial(5)
+</pre>
+
+<h2 class="logoed">Derived Core Forms</h2>
+    <h3>Overview</h3>
+        Derived Core Forms are a collection of forms that can be defined in terms
+        of the elementary core forms using macros. However, it is not required for
+        an implementation to implement derived core forms in this manner.
+    <h3>Define</h3>
+        Syntax:<code> (define (<var>function</var> <var>param<sub>1</sub></var> ...)
+        <var>body</var>)  OR  <br />
+        (define ( (<var>rettype</var> <var>function</var>) 
+        <var>param<sub>1</sub></var> ...) <var>body</var>) </code> <br />
+        Alias: <code>def</code><br /><br />
+        "Define" is equivalent to a declaration with the name <var>function</var> and the
+        value of a function defined using lambda with the appropriate locations filled
+        in. This is the preferred way to define functions. <br />
+        Example: <br />
+<pre>
+def (int pow) (int x) (int n)
+    if n = 0
+       1
+       x * pow(x, n - 1)
+</pre>
+    <h3>Let</h3>
+        Syntax:<code> (let ((<var>param<sub>1</sub></var> <var>val<sub>1</sub></var>) ...)
+        <var>body</var>) OR<br /></code>
+        (Same thing, but with one parameter, the extra set of parens is unnecessary) <br />
+        <br />
+        Let is equivalent to an expression consisting of a
+        lambda with the given params abstracting over <var>body</var>
+        applied to each val in the order they appear. "Let" is useful for
+        assigning a name to a certain expression or value that appears
+        too often in a given expression, improving readability. The values
+        of each parameter may not refer to other parameters in the same let
+        declaration. 
+        <br />
+        Example:
+<pre>
+import math
+def (float x) ((float float) coordinates)
+    car coordinates
+def (float y) ((float float) coordinates)
+    car(cdr coordinates)
+
+def (float distance) ((float float) p1) ((float float) p2)
+    let (xdist (p1.x - p2.x)) (ydist (p1.y - p2.y))
+            math.sqrt((xdist * xdist) + (ydist * ydist))
+</pre>
+    <h3>Case</h3>
+        Syntax:<code> (case (<var>cond<sub>1</sub></var> <var>val<sub>1</sub></var>)
+        ... val<sub>default</sub>)<br /></code>
+        Where <var>cond<sub>n</sub></var> is of type "bool".<br /><br />
+        Case is like a nested set of "if"'s, starting with 
+        <code>(if <var>cond<sub>1</sub></var> <var>val<sub>1</sub></var> ...)</code>
+        And nesting through the ... until the conditions run out, leaving just the
+        default value. It is useful for situations where "if" statements would form
+        a chain. <br />
+        Example:
+<pre>
+//note: this is horrendously inefficient, but intuitive
+def (int fibbonaciAt) (int i)
+    case
+        i = 0
+            1
+        i = 1
+            1
+        fibbonaciAt(i - 1) + fibbonaciAt(i - 2)
+</pre>
+<hr />
+<h6>
+<a href="concur.html">
+    <img alt="Concur Logo" src="images/concurtextlogo.png" style="width:64px;height:24px;">
+    <br />
+    Back to Main Page
+</a>
+</h6>
+</body>

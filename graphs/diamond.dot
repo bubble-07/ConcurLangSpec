@@ -1,0 +1,8 @@
+digraph Diamond {
+    node [shape=box fontsize=30]
+    nodesep=1.0
+    Any -> Rectangle
+    Any -> Clickable
+    Rectangle -> Button
+    Clickable -> Button
+}

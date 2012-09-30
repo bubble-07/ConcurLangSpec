@@ -1,0 +1,77 @@
+<!doctype HTML>
+<html>
+<head>
+<link rel="icon" type="image/ico" href="images/concurlogoscaled.ico"/>
+<link rel="stylesheet" type="text/css" href="style.css" />
+<title>Concur Spec: Philosophy</title>
+</head>
+<body>
+<h1 style="font-size:36px;">
+    <a href="concur.html">
+    <img alt="Concur Logo" src="images/concurtextlogo.png" style="height:48px;width:128px;">
+    </a>
+    Philosophy
+</h1>
+<hr />
+<h2 class="logoed">
+    Beautiful Simplicity
+</h2>
+    <p>
+        Simplicity is beautiful. Oftentimes, a complex solution to a problem obscures
+        a simpler solution. Concur aims to be conceptually simple and derive 
+        expressive power from this simplicity. 
+</p>
+<h2 class="logoed">
+    Concurrency and Parallelism for Free!
+</h2>
+    <p>
+        Multi-core systems and massively parallel processors such as GPU's are the future of computing. However, it is massively difficult to write programs that take advantage of them. While some programs fundamentally cannot take advantage of parallelism, it should be easy to write programs that do when they can. As a result, Concur's specification calls for two major features that make parallelism and concurrency easy and natural. 
+    </p>
+    <p>
+        Concur features call-by lazy future as an evaluation scheme, which means that every argument to every function gets its own lightweight thread for evaluation which is computed as it is substituted into the body of the function, where evaluation continues in parallel. This means that functions such as map take advantage of parallelism by default, and custom recursions on tree-like structures are optimized to take advantage of parallelism as well. Normally, even with lightweight threads and load balancing, this could be inefficient, but implementations do not have to actually use call-by future everywhere -- the only requirement is that programs mean the same thing as they would if they were evaluated lazily -- instead, it is a guideline that should be considered as the default case, with lazy evaluation or strict evaluation as the exception for performance where they are applicable. This is a reversal of the trend of other languages, which are sequential-first, then parallel. Concur is parallel-first.
+        </p>
+        <p>
+        In addition, Concur's model of FRP, EDFRP, is meant to give intuitive manual control over parallel threads of execution, and yet guarantee the atomicity of references [refs] and referential transparency within the same time-slice, which eliminates the need for manual locking or a STM monad in most cases. Reliable transctions are also just a transaction(...) away. 
+        </p>
+
+<h2 class="logoed">
+    Types Are Constraints, Not Code
+</h2>
+    <p>
+        Types should not place arbitrary restrictions on code, nor should they be used as code.
+        Types should only constrain where such constraints are semantically necessary, and it
+        should be easy to extend existing types and existing functions for the benefit of the
+        programmer. Concur aims to accomplish this with its ad-hoc polymorphism and subtyping
+        mechanism, which allows some static constraints on types to be verified while keeping
+        the power and flexibility of a dynamic language wherever necessary. 
+    </p>
+
+<h2 class="logoed">
+    Higher-Level Thought, Not Implementation Details
+</h2>
+    <p>
+        Implementation details should be abstracted away, allowing the programmer to reason
+        about code at a higher level without worrying about underlying representation.
+    </p>
+<h2 class="logoed">
+    If You Can't Beat 'Em, Learn
+</h2>
+    <p>
+        If there is a deficiency in Concur, or something is easier in another language,
+        special care must be taken to ensure that the features found in the other language
+        are investigated and incorporated into Concur, provided that they fit with
+        the philosophies listed above. It is alright to make major revisions to the standard,
+        provided that the revisions are well-reasoned, well-debated, and come with a major
+        version number increment. However, it is important to note that a feature should
+        be considered for inclusion in the core language iff it cannot be expressed within
+        the language as it stands.
+        </p>
+<hr />
+<h6>
+<a href="concur.html">
+    <img alt="Concur Logo" src="images/concurtextlogo.png" style="height:24px;width:64px;">
+    <br />
+    Back to Main Page
+</a>
+</h6>
+</body>

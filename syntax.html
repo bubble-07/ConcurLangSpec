@@ -1,0 +1,312 @@
+<!doctype HTML>
+<html>
+<head profile="http://www.w3.org/2005/10/profile">
+<link rel="shortcut icon" href="images/concurlogoscaled.ico"/>
+<link rel="stylesheet" type="text/css" href="style.css" />
+<title>Concur Spec: Syntax</title>
+</head>
+<body>
+<h1 style="font-size:36px;">
+    <a href="concur.html">
+    <img alt="Concur Logo" src="images/concurtextlogo.png" style="width:128px;height:48px;">
+    </a>
+    Syntax
+</h1>
+<hr />
+<h2 class="logoed">
+    Overview
+</h2>
+        Concur has some roots in LISP, and as such, every program is represented as S-Expressions.
+        However, the "excessive" parentheses and the "foreign" nature of prefix notation deter
+        many programmers away from LISP and variants. Concur solves both of these problems, and
+        also makes the syntax more familiar to users of other languages through the use of a
+        minimal set of transformations from what are called "syntatic forms" to S-Exprs. These 
+        transformations support C/Python/Java/whatever style functions, "block" indentation,
+        line completions, "object member/method" syntax, and a limited form of infix notation
+        to add to standard S-expressions. The addition of syntatic forms makes Concur easy
+        to read when they are used idiomatically. 
+<h2 class="logoed">
+    S-Expressions
+</h2>
+        S-Expressions are the basic underlying representation of code in Concur. S-Expressions
+        are basically lists enclosed in parentheses where each element is separated by whitespace.
+        Ex:
+        <code>(1 2 3 4 5)</code>
+        In an S-Expression, if the first element is a function, then the following items of the
+        list will be passed as arguments to the function. 
+        <code>(<var>function</var> <var>arg<sub>1</sub></var> <var>arg<sub>2</sub></var> ...)</code>
+        S-Expressions require that functions be the first element of a list to be evaluated --
+        <code>(2 + 2)</code> is not the same as 4, it is only the same as <code>(2 + 2)</code>
+        You would need to type <code>(+ 2 2)</code> to get the correct result. 
+<h2 class="logoed">
+    Comments
+</h2>
+        Comments in Concur come in two forms -- block comments <code>/* This is a comment */</code>
+         and line comments. <br /><code>//This is also a comment</code>
+         <br /><code>#Yet another comment</code> <br />At the present moment, nested comments and
+         docstrings are not specified by the Concur Language Spec. 
+<h2 class="logoed">
+    Identifiers
+</h2>
+        Identifiers consist of any string of valid characters. Valid characters for identifiers
+        include everything with the exceptions of 
+        <pre><code>  "  (  )  {  }  [  ]  . , </code></pre>, and 0-9 cannot be used for the first
+        character in an identifier. Identifiers are also required to be case-insensitive for
+        the first character.
+        Identifiers are used to express parameter names, type names, and function names. 
+<h2 class="logoed">
+    Literals
+</h2>
+    <h3>
+        String Literals
+    </h3>
+            Strings consist of an opening set of quotes  "  and some text closed by  ". 
+            At the current moment, this specification leaves nested quotation up to
+            determination by implementation -- after an implementation exists it should
+            be swiftly integrated into the language standard.
+    <h3>
+        Integer Literals
+    </h3>
+            An integer literal consists of any contiguous sequence of numerals that does not
+            classify as part of a floating-point literal or a arbitrary-precision literal.
+            Examples: <code> 1 2 3 </code>
+    <h3>
+        Floating-Point Literals
+    </h3>
+            Floating-point literals consist of a contigous sequence of numerals, optionally
+            followed by a dot and another sequence of numerals, terminated by the suffix "f".
+            Examples: <code>1.0f 30000.0001f</code>
+    <h3>
+        Arbitrary-Precision Literals
+    </h3>
+            Arbitrary-precision literals are the same as floating-point literals, but without
+            the "f" suffix. Examples: <code> 1.0  2.3  3.1415926535 </code>
+    <h3>
+        Imaginary Literals
+    </h3>
+            Imaginary literals consist of any of the above literals with an "i" appended to the
+            end. Examples: <code> 1.0i  1.0fi  3i </code> Example of a complex number:
+            <code>(5.0 + 1.0i)</code>
+    <h3>
+        Binary Literals
+    </h3>
+            Binary literals consist of a sequence of 1's and 0's terminated by "b". 
+            Example: <code> 10111001b </code>
+    <h3>
+        Hex Literals
+    </h3>
+            Hex literals consist of the prefix "0x" followed by any contiguous sequence of
+            0-9 A-F . 
+            Example: <code> 0xDEADBEEF </code>
+
+<h2 class="logoed">
+    Syntatic Forms
+</h2>
+    Syntatic forms allow Concur to be more expressive in syntax. They are translated to 
+    S-expressions, and the following sections will provide a visual demonstration of the
+    translation followed by a technical description and an example. These transformations 
+    can be applied in any order, except for where noted. In the following sections, 
+    optional parameters and syntatic components are surrounded by []'s.
+    <h3>
+        "Function Call" Form
+    </h3>
+            <code>f(a,b c,d)</code> <code class="smallarrow">&#8594;</code> 
+            <code>(f a (b c) d)</code> <br />
+            <code><var>function</var>(<var>arg<sub>1<sub>1</sub></sub></var> 
+            [<var>arg<sub>1<sub>2</sub></sub></var> [...]]
+            [, <var>arg<sub>2<sub>1</sub></sub></var> ...]
+            )</code>
+            <br /><br />
+            A "Funcall" form consists of a valid identifier for a function followed by
+            an opening paren, followed by either a parameter or a space-separated list that
+            will function as the first argument, optionally followed by a comma and more
+            arguments in this format delimited by commas. If a space-separated list is used
+            instead of a single parameter, the space-separated list becomes a nested list
+            that is placed into the correct position for the argument. Otherwise, the
+            parameter is simply placed in the correct position for the argument. <br /><br />
+            Examples of this transformation:
+            <br /><br />
+            <code>print(lowerToUpper "hi")  </code> <code class="smallarrow">&#8594;</code> 
+            <code>  (print (lowerToUpper "hi"))</code> <br />
+            <code>map(+ 3, 1 2 3 4 5 6)  </code> <code class="smallarrow">&#8594;</code>
+            <code>  (map (+ 3) (1 2 3 4 5 6))</code> <br />
+            <code>pow(2,3)  </code> <code class="smallarrow">&#8594;</code> <code>  (pow 2 3)</code>
+    <h3>
+        "Object Member/Method" Forms
+    </h3>
+        While Concur is NOT an Object-Oriented language by design, Concur does have
+        structs and polymorphism, which effectively capture the functionality of OOP.
+        Whenever you are accessing members of a struct using accessor functions or
+        are using functions that would make sense as methods in other languages,
+        these forms are a good choice.
+        <h4>
+            Object Member Form
+        </h4>
+            <code>x.y.z </code><code class="smallarrow">&#8594;</code> <code> (z (y x))</code><br />
+            <code><var>object</var>.<var>member<sub>1</sub></var>[. ...]</code><br /><br />
+            This form consists of an object [any valid identifier <b>or literal</b>]
+            followed by a dot, followed by a member [any valid identifier], optionally
+            followed by more dot-separated members. Since members of structs [primary use]
+            are actually functions that take a struct and return the value of the member,
+            this notation gives the correct behavior since the last member becomes the
+            outermost function, and this is recursive down to the first member. <br /><br />
+
+            Examples of this transformation: <br /><br />
+            <code>player.position.x </code><code class="smallarrow">&#8594;</code> <code> (x (position player))
+            </code><br />
+            <code>"Hello World!".length </code><code class="smallarrow">&#8594;</code> 
+            <code> (length "Hello World!)</code>
+        <h4>
+            Object Method Form
+        </h4>
+            <code>x.y.f(a b,c) </code> <code class="smallarrow">&#8594;</code> <code> (f (y x) (a b) c)</code> <br />
+            <code><var>object</var>[.<var>member<sub>1</sub></var> ...].<var>funcall</var> </code>
+            Where "funcall" is something that is valid in "Function Call" syntax.<br /><br />
+            
+            Object method syntax is effectively a combination of object member syntax and
+            function call syntax. It can be translated by translating the function call first,
+            then inserting the transformed version of the object and its' members as the first
+            argument to the function. <br /><br />
+
+            Examples of this transformation: <br /><br />
+            <code>player.resolveCollisionWith(projectile) </code><code class="smallarrow">&#8594;</code>
+            <code> (resolveCollisionWith player projectile)</code><br /><br />
+            <code>icon.displaybox.setDims(double size, size) 
+            </code><code class="smallarrow"> &#8594; </code>
+            <code> (setDims (displaybox icon) (double size) size)</code>
+    <h3>
+        "Indented Block" Form
+    </h3>
+        <table  >
+        <tr>
+            <td>
+<pre>
+<var>f</var> <var>a</var> <var>b</var>
+    c
+    d
+</pre>
+            </td>
+            <td>
+                <pre class="arrow"> &#8658; </pre>
+            </td>
+            <td>
+                <code>(f (a b) c d)</code>
+        </tr>
+        </table>
+<pre>
+<var>function</var> [<var>arg<sub>1<sub>1</sub></sub></var> ...]
+    <var>arg<sub>1 [or 2]<sub>1</sub></sub></var> [...]
+    [<var>arg<sub>2 [or 3]<sub>1</sub></sub></var> [...]]
+    [...]
+</pre>
+        <br />
+        Indented blocks consist of a function followed by a space-separated list of
+        components of the first argument, followed by indented sequences of space-separated
+        components of additional arguments. "indented" is defined as either the addition of
+        a tab character or more than two spaces from the beginning of a block. An indentation
+        level is required to be consistent -- no mixing tabs and spaces for the same level!
+        If parsing is sequential, the innermost indented block MUST be translated first.
+        In addition, if one of the indented arguments is a singleton list, or is already
+        enclosed in parens, extra parentheses should not be added.<br />
+        Examples of this transformation: <br />
+<table  >
+<tr>
+    <td>
+<pre>
+def (int fac) (int n)
+    if n = 0
+       1
+       n * fac(n - 1)
+</pre>
+    </td>
+    <td>
+        <pre class="arrow">&#8658;</pre>
+    </td>
+    <td>
+        <pre>(def ((int fac) (int n)) (if (= n 0) 1 (* n (fac (- n 1)))))</pre>
+    </td>
+</tr>
+<tr>
+    <td>
+<pre>
+letref a 0
+    do
+        while (a != 1000)
+            print a
+            mutateref a (+ 1)
+</pre>
+    </td>
+    <td>
+        <pre class="arrow"> &#8658; </pre>
+    </td>
+    <td>
+       <pre> (letref (a 0) (do (while (!= a 1000) (print a) (mutateref a (+ 1)))))</pre>
+    </td>
+</tr>
+</table>
+        Note that the above examples are a great improvement in readability over their
+        S-Expression equivalents. -- The first example only uses 3 pairs of parens under 
+        Concur's syntax, but the S-expression equivalent uses 9 pairs of parens. The second
+        example is 2 vs. 8. In addition to reducing parens, indentation syntax standardizes
+        an indentation style, which further improves readability of programs.
+    <h3>
+        "Line Fold" Form
+    </h3>
+        This form basically says that any opening paren that is not completed by the end
+        of a line defines an S-expression that continues until the ending paren -- that is,
+        all the way up to the line the end is on, the line continues "logically". 
+        This allows arguments in function definitions to be on multiple lines in addition
+        to allowing traditional-style S-expressions with traditional-style indentation.
+        The feature of allowing traditional-style S-expressions can be used by recovering
+        LISP programmers while they get used to Concur, but they are not idiomatic
+        and should eventually be converted to more idiomatic syntax using the syntatic forms
+        correctly. <br /><br />
+        Examples:<br /><br />
+<pre>
+def ((effect draw) (image img)
+     (vector2D pos) (vector2D dimensions))
+    ...
+
+(def (double-arg f x)
+    (f x x)
+)
+</pre>
+
+<h2 class="logoed">
+    Transformations on the AST
+</h2>
+    In addition to the above syntatic elements and transformations, two transformations
+    take place at the level of the AST: Reordering and singleton elimination. 
+    <h3>
+        Reordering
+    </h3>
+        <code>(a f b)</code> <code class="smallarrow">&#8594;</code> <code>(f a b)</code> <br />
+        Where f is a function and a is NOT a function.
+
+        Basically, the reordering transform means that the first item that has the type
+        signature of a function in a S-expression is reordered to be the first item of 
+        the S-expression. In addition, this transformation applies to parametric types
+        and types. [with parametric types taking the role of functions]. This allows a
+        limited form of infix notation, and makes it possible to write (2 + 2) or
+        (a &#8594; b) or (b and c) ... etc. This solves the problem of the "foreign-ness"
+        of prefix notation, but it avoids adding the complexity of precedence-levels
+        to the parser and to the user. It does force the programmer to
+        explicitly specify the order of operations with parentheses and syntatic forms,
+        however, this is a good thing.
+    <h3>
+        Singleton Elimination
+    </h3>
+        <code>((x) y)</code><code class="smallarrow">&#8594;</code> <code>(x y)</code> <br /><br />
+        This transformation eliminates any singleton lists. If you want a singleton list
+        for some reason or another, you need to explicitly construct one with
+        singleton(x). 
+
+<hr />
+<h6>
+<a href="concur.html">
+    <img alt="Concur Logo" src="images/concurtextlogo.png" style="width:64px;height:24px;">
+    <br />
+    Back to Main Page
+</a>
+</h6>
+</body>

@@ -1,0 +1,27 @@
+digraph hello {
+    node [shape=box fontsize=30]
+    nodesep=1.0
+    Any -> Eq
+    Eq->Number
+    Eq->Bool
+    Number->Int
+    Number->Float
+    Bool->Boolean
+    Boolean->Bool
+    Integer->Int
+    Int->Integer
+    /*
+    Any->Int
+    Any->Integer
+    Any->Bool
+    Any->Boolean
+    Any->Float
+    Any->Number
+    Eq->Int
+    Eq->Integer
+    Eq->Float
+    Eq->Boolean
+    Number->Integer
+    */
+    {rank=same; Int Float Bool Integer Boolean}
+}
