@@ -297,7 +297,60 @@ def ((effect draw) (image img)
 
 <h2>BNF Grammar</h2>
 <pre>
-&lt;lines&gt; ::= &lt;block&gt; &lt;morelines&gt; | &lt;unexprlist&gt; &lt;newline&gt; &lt;morelines&gt; 
+
+lines ::= block morelines | unexprlist newline morelines
+morelines ::= lines | e
+block ::= unexprlist newline begin lines end
+
+factor ::= (optwhite exprlist optwhite)
+factor ::= stringlit | id
+factor ::= funapp
+term ::= factor | numlit
+term ::= dotapp
+funapp ::= id ( commasep )
+commasep ::= optwhite exprlist optwhite morecomma
+morecomma ::= , commasep | e
+dotapp ::= factor . moredot
+moredot ::= factor | dotapp
+
+exprlist ::= term morelist
+morelist ::= e | white exprlist
+
+unexprlist ::= term moreunplist
+moreunplist ::= e | unpwhite unexprlist
+
+
+optwhite ::= white | e
+white ::= whiteelem optwhite | newline optwhite
+
+newline ::= \n | / / any \n
+whiteelem ::= ' ' | '    ' |  /* any */
+
+optunpwhite ::= unpwhite | e
+unpwhite ::= whiteelem optunpwhite
+
+numlit ::= decimal | int
+optfmt ::= f | d | b | e
+optimaginary ::= i | e
+optsign ::= - | e
+digit ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+digits ::= digit optdigits
+optdigits ::= digits | e
+decimal ::= optsign optdigits . digits optfmt optimaginary
+int ::= optsign digits optfmt optimaginary
+
+
+stringlit::=" any "
+any ::= safe any | e
+
+safe ::= {all characters that are not " or \n or // or /*}
+
+id ::= idfst idrest
+idfst ::= {all idchars that are not numeric}
+idrest ::= idchar idrest | e
+idchar ::= {all characters that are safe but are not whitespace, ( ) { } [ ] . or ,}
+
+</pre> 
 <hr />
 <h6>
 <a href="concur.html">

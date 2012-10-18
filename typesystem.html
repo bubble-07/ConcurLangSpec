@@ -301,15 +301,27 @@ def print (string in) t
     <h5>or</h5>
     <h5>not [byte-&gt;byte]</h5>
 
+    <br />
+    As explained previously in "Syntax", byte literals may be expressed through syntax of
+    the form "1001000b" or through the form "0x7F".
+
     <h4>Pair A B</h4>
     Pair is a parametric structural type that expresses "A and B" -- it is entirely up to
-    implementation as to how these are stored. However, the operations <code>fst</code> and
-    <code>snd</code> [introduced later] must work as intended. 
+    implementation to how both items are stored in memory
+    <h5>fst [(Pair A B) -> A]</h5>
+    Returns the first element. 
+    <h5>snd [(Pair A B) -> B]</h5>
+    Returns the second element.
+    <h5>cons [A -> B -> (Pair A B)]</h5>
+    Constructs a pair of A and B. 
     <h4>FixedOf [Int] A</h4>
     FixedOf is a special structural type that accepts an integer constant, and it expresses
     contiguous storage of [Int] elements with structural type A. The restriction upon [Int]
     is that it must be a parser-readable Integer constant, and cannot be the result of
     another expression.
+    <h5>item [(FixedOf [Int] A) -> Int -> A]</h5>
+    Item returns the element at the given index. 
+    [starting from 0 as the first item in contiguous storage],
     <h4>VarOf A</h4> 
     VarOf expresses a contiguous storage region of a variable size containing elements
     with a structural type of A.
