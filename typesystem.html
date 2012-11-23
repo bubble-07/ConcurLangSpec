@@ -77,17 +77,17 @@ apply for types.
 <h4>Subtyping</h4>
 <code><var>A</var> subtypes <var>B</var></code> <br />
 <code><var>A</var> subs <var>B</var></code> <br />
-<code><var>A</var> &lt;~ <var>B</var></code> <br />
+<code><var>A</var> &lt;: <var>B</var></code> <br />
 <br />
 For example, the earlier diamond-shaped graph could be represented as: <br />
-<code>Button &lt;~ Rectangle <br />
-Button &lt;~ Clickable </code><br />
+<code>Button &lt;: Rectangle <br />
+Button &lt;: Clickable </code><br />
 <h4>Supertyping</h4>
 <code><var>A</var> supertypes <var>B</var> </code> <br />
 <code><var>A</var> sups <var>B</var> </code> <br />
-<code><var>A</var> ~&gt; <var>B</var> </code> <br /> <br />
+<code><var>A</var> :&gt; <var>B</var> </code> <br /> <br />
 Example: <br />
-<code>Number ~&gt; Integer </code> 
+<code>Number :&gt; Integer </code> 
 <h4>Type Equality</h4>
 <code>typedef <var>A</var> <var>B</var> </code> <br /> <br />
 Example: <br />
@@ -149,12 +149,12 @@ Example: <br />
     valid identifier that is not already used as a type or as a function.
     Type variables are useful for specifying universal relations between types.
     <br /><br />For example: <br />
-    <br /><code>Any ~&gt; A</code> <br />for all A. <br /><br />
+    <br /><code>Any :&gt; A</code> <br />for all A. <br /><br />
     In Concur, the "for all" is implied,
     so the previous code is actually entirely accurate. In addition, with a type
     variable, it is possible to quantify subtyping relations of parametric types.
     For example: <br /><br />
-    <code>Termin A &lt;~ A</code><br /><br />
+    <code>Termin A &lt;: A</code><br /><br />
     "Termin" is a parametric type that expresses "provable termination" --
     Since values in Concur are actually computations 
     [See <a href="evaluation.html">Evaluation</a>], it is possible to give
@@ -164,7 +164,7 @@ Example: <br />
     convenience type that allows programmers to partially reason about termination,
     and it could potentially help a compiler/interpreter make smarter decisions about
     code. To understand the above declaration, try substituting "Int" for "A". <br />
-    <br /><code>Termin Int &lt;~ Int</code><br /><br />
+    <br /><code>Termin Int &lt;: Int</code><br /><br />
     This reads as "wherever an Int is accepted, a Termin Int is accepted as well".
     However, the relation does not go the other way by design -- if a terminating
     computation that returns an Int is required, it is required, and a type error
@@ -174,12 +174,12 @@ Example: <br />
     to a parametric type in a subtyping relation [for the sake of simplicity] -- the subtyping
     constraint must be the same across the entire domain of the parameter. <br />
     Example: <br />
-    <code>Either A B ~&gt; A</code><br />
-    <code>Either A B ~&gt; B</code><br /> <br />
+    <code>Either A B :&gt; A</code><br />
+    <code>Either A B :&gt; B</code><br /> <br />
     The above parametric type would express the type of 
     something that could be of either type A or of type B
-    -- for example, "Either Num String" means both <code>Either Num String ~&gt; Num</code> and
-    <code>Either Num String ~&gt; String</code>. However, these are not valid as subtyping
+    -- for example, "Either Num String" means both <code>Either Num String :&gt; Num</code> and
+    <code>Either Num String :&gt; String</code>. However, these are not valid as subtyping
     relations by themselves -- being able to express arbitrary exceptions for specific types
     provided to parametric types would make the type system quickly grow complicated, so for now,
     parametric types always need type variables as parameters in subtyping relations. 
@@ -258,8 +258,8 @@ def print (string in) t
     Ad-hoc polymorphic functions are "glued together" with the type:<br />
     <code>type Poly function function</code> <br />
     and the rules:<br />
-    <code>Poly A B &lt;~ A</code><br />
-    <code>Poly A B &lt;~ B</code><br />
+    <code>Poly A B &lt;: A</code><br />
+    <code>Poly A B &lt;: B</code><br />
     These constraints allow higher-order polymorphic functions to work as intended. 
     For polymorphic
     functions with more than two ad-hoc definitions, nested "Poly" types may be used --

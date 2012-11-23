@@ -142,32 +142,40 @@
             followed by a dot, followed by a member [any valid identifier], optionally
             followed by more dot-separated members. Since members of structs [primary use]
             are actually functions that take a struct and return the value of the member,
-            this notation gives the correct behavior since the last member becomes the
-            outermost function, and this is recursive down to the first member. <br /><br />
+            this notation gives the correct behavior since the last member accessor becomes the
+            outermost function, and the process is repeated until the root object is reached
+            . <br /><br />
 
             Examples of this transformation: <br /><br />
-            <code>player.position.x </code><code class="smallarrow">&#8594;</code> <code> (x (position player))
-            </code><br />
+            <code>player.position.x </code><code class="smallarrow">&#8594;</code> 
+            <code>(x player.position)</code> <code class="smallarrow">&#8594;</code>
+            <code> (x (position player))</code><br />
             <code>"Hello World!".length </code><code class="smallarrow">&#8594;</code> 
             <code> (length "Hello World!)</code>
         <h4>
             Object Method Form
         </h4>
-            <code>x.y.f(a b,c) </code> <code class="smallarrow">&#8594;</code> <code> (f (y x) (a b) c)</code> <br />
+            <code>x.y.f(a b,c) </code> <code class="smallarrow">&#8594;</code> <code> ((f (a b) c)(y x))</code> <br />
             <code><var>object</var>[.<var>member<sub>1</sub></var> ...].<var>funcall</var> </code>
             Where "funcall" is something that is valid in "Function Call" syntax.<br /><br />
             
             Object method syntax is effectively a combination of object member syntax and
-            function call syntax. It can be translated by translating the function call first,
-            then inserting the transformed version of the object and its' members as the first
-            argument to the function. <br /><br />
+            function call syntax. This is not an additional rule per se, it's simply an
+            emergent result of the precedence of the function call transformation over
+            the object method transformation. For a visual [each successive line is
+            equivalent]:<br /><br />
 
-            Examples of this transformation: <br /><br />
+            <code>x.y.f(a,b)</code><br />
+            <code>x.y.(f a b) //Yes, perfectly valid!</code><br />
+            <code>((f a b) x.y)</code><br />
+            <code>((f a b) (y x))</code><br /><br />
+
+            Examples: <br /><br />
             <code>player.resolveCollisionWith(projectile) </code><code class="smallarrow">&#8594;</code>
-            <code> (resolveCollisionWith player projectile)</code><br /><br />
+            <code> ((resolveCollisionWith projectile) player)</code><br /><br />
             <code>icon.displaybox.setDims(double size, size) 
             </code><code class="smallarrow"> &#8594; </code>
-            <code> (setDims (displaybox icon) (double size) size)</code>
+            <code> ((setDims (double size) size) (displaybox icon))</code>
     <h3>
         "Indented Block" Form
     </h3>
@@ -199,9 +207,8 @@
         components of additional arguments. "indented" is defined as either the addition of
         a tab character or more than two spaces from the beginning of a block. An indentation
         level is required to be consistent -- no mixing tabs and spaces for the same level!
-        If parsing is sequential, the innermost indented block MUST be translated first.
-        In addition, if one of the indented arguments is a singleton list, or is already
-        enclosed in parens, extra parentheses should not be added.<br />
+        All other transformations take precedence over this one, and innermost blocks take
+        precedence over outermost blocks..<br />
         Examples of this transformation: <br />
 <table  >
 <tr>
@@ -254,7 +261,7 @@ letref a 0
         The feature of allowing traditional-style S-expressions can be used by recovering
         LISP programmers while they get used to Concur, but they are not idiomatic
         and should eventually be converted to more idiomatic syntax using the syntatic forms
-        correctly. <br /><br />
+        correctly. Line folds take precedence over blocks.<br /><br />
         Examples:<br /><br />
 <pre>
 def ((effect draw) (image img)
