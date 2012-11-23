@@ -1,0 +1,80 @@
+<!doctype HTML>
+<html>
+<head>
+<link rel="icon" type="image/ico" href="images/concurlogoscaled.ico"/>
+<link rel="stylesheet" type="text/css" href="style.css" />
+<title>Concur Spec: Effect System</title>
+</head>
+<body>
+<h1 style="font-size:36px;">
+    <a href="concur.html">
+    <img alt="Concur Logo" src="images/concurtextlogo.png" style="width:128px;height:48px;">
+    </a>
+    Effect System
+</h1>
+<hr />
+<h2 class="logoed">
+    Overview
+</h2>
+    Concur's effect system is a modified form of FRP termed EDFRP. In EDFRP, every value that
+    changes over time is represented as a function from time to values, and every side-effect
+    is represented as a value. A program in Concur is essentially a function from time to
+    effects, or "effects over time". Effects can be sequenced or run concurrently depending
+    on how the effect values are ultimately combined.
+<h2 class="logoed">
+    Signals
+</h2>
+    In Concur, Signals are the generic term for any function from a time to a value. That is:
+    <br /> <code>(Signal A) ~ (-&gt; Time A)</code><br />
+    Signals can be used to model any input that changes over time. For instance, <br />
+    <br /> <code>randomBit :: Time -&gt; Bool</code> <br />
+    could represent a function that returns a different random Boolean value depending on
+    what time it's evaluated at. This is the same as <br />
+    <code> randomBit :: Signal Bool </code> <br />
+    It is possible to manually define signal functions. 
+
+<h2 class="logoed">
+    Main
+</h2>
+<pre>
+globref (WindowHandle mainwindow)
+def (effect main) (time t)
+    seq
+        init    
+        forever
+            display currenttime
+
+def (effect init) 
+    Qt.createWindow(640,480, mainwindow) //creates window of 640 by 480 and loads globref with it
+
+def (effect display) (int todisplay)
+    seq
+        Qt.drawtext(0,0,todisplay.toString,mainwindow)
+        Qt.refresh(30)
+def (effect forever) (listof(either(-&gt; time effect, effect)) etc)
+    seq
+        seq etc
+        forever
+def (effect seq) (listof(either(-&gt; time effect, effect)) etc) (time t)
+</pre>
+
+<h2>
+    Model
+</h2>
+    In Concur, values that vary over time are represented with functions of the form
+    (time -&gt; value). Every external, real-world input in Concur is represented as 
+    a function of this form, termed a signal. When provided a time, a signal will return
+    a value that may be used in other computations. Since all functions in Concur are
+    referentially transparent, the same signal evaluated at the same time will always
+    return the same value. This is a very important aspect of signals that must be preserved.
+    <br />For example, <br />
+
+<hr />
+<h6>
+<a href="concur.html">
+    <img alt="Concur Logo" src="images/concurtextlogo.png" style="width:64px;height:24px;">
+    <br />
+    Back to Main Page
+</a>
+</h6>
+</body>
