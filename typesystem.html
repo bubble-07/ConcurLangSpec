@@ -78,7 +78,7 @@ apply for types.
 <code><var>A</var> subs <var>B</var></code> <br />
 <code><var>A</var> &lt;: <var>B</var></code> <br />
 <br />
-For example, the earlier diamond-shaped graph could be represented as: <br />
+For example, the earlier diamond-shaped graph could be represented as: <br /><br />
 <code>Button &lt;: Rectangle <br />
 Button &lt;: Clickable </code><br />
 <h4>Supertyping</h4>
@@ -133,7 +133,7 @@ Example: <br />
     nested as function applications would.<br />
     Parametric types can be declared using "type", but with the name of the parametric
     container coming first, followed by the domain that each parameter can take on. <br /><br />
-    Examples: <br /> <br />
+    Examples: <br />
     <code>type Vector2D Number //Ex: Vector2D(Float) and Vector2D(Int)</code> <br />
     <code>type Dict Hashable Any </code> <br /> <br />
     It is a type error if a parametric type is instantiated with parameters outside of
@@ -144,10 +144,10 @@ Example: <br />
     valid identifier that is not already used as a type or as a function.
     Type variables are useful for specifying universal relations between types.
     <br /><br />For example: <br />
-    <br /><code>Any :&gt; A</code> <br />for every type A. <br /><br />
+    <code>Any :&gt; A  //for every type A.</code> <br /><br />
     In Concur, the "for every" is implied. In addition, with a type
     variable, it is possible to express general subtyping relations of parametric types.
-    For example: <br /><br />
+    <br /><br />For example: <br />
     <code>Termin A &lt;: A</code><br /><br />
     "Termin" is a parametric type that expresses "provable termination" --
     Since values in Concur are actually computations 
@@ -167,7 +167,7 @@ Example: <br />
     As of v1.0, it is illegal to provide anything other than a type variable
     to a parametric type in a subtyping relation [for the sake of simplicity] -- the subtyping
     constraint must be universal across all type parameters. <br />
-    Example: <br />
+    <br />Example: <br />
     <code>Either A B :&gt; A</code><br />
     <code>Either A B :&gt; B</code><br /> <br />
     The above parametric type would express the type of 
@@ -236,15 +236,16 @@ def print (string in) t
 
     <h3>The type of ad-hoc polymorphic functions</h3>
     Ad-hoc polymorphic functions take on the type:<br />
-    <code>type Poly function function</code> <br />
+    <code>type Poly function function</code> <br /><br />
     and the rules:<br />
     <code>Poly A B &lt;: function</code><br />
     <code>Poly A B &lt;: A</code><br />
-    <code>Poly A B &lt;: B</code><br />
+    <code>Poly A B &lt;: B</code><br /><br />
     These constraints allow higher-order polymorphic functions to work as intended. 
     For polymorphic
     functions with more than two ad-hoc definitions, "Poly" types nested from left-to-right
-    may be used. E.G: "Poly A (Poly B (Poly C D))" where A, B, C, and D are function types.
+    may be used. E.G: <code>Poly A (Poly B (Poly C D))</code>
+    where A, B, C, and D are function types.
 <hr/>
 
 <h2 class="logoed">Structural Types</h2>
@@ -264,20 +265,21 @@ def print (string in) t
         <br /><code>type ArrayOf(tNum, A)</code> <br /><br />
         Where "tNum" is a supertype of integer literals implicitly lifted to the
         type level (shh, don't tell Haskell!). If N is declared as "tNum", the array may
-        have any arbitrary number of elements<br />
+        have any arbitrary number of elements<br /><br />
         For example: <br />
-        <code>Arrayof(tNum, Char) //Could represent a string of arbitrary length</code>
+        <code>Arrayof(tNum, Char) //Could represent a string of arbitrary length</code> <br />
         <code>ArrayOf(100, Char) //Could represent a fixed-width string of 100 characters</code>
+        <br />
         <code>ArrayOf(100, ArrayOf(100, Float)) //Could represent a 2D matrix of floats.</code>
     <h3>-&gt; A B</h3>
         Functions are technically structural types.
 <h2 class="logoed">Type Casting</h2>
-    Structural types may be cast to become one of their subtypes. 
+    Structural types may be cast to become one of their subtypes. <br /><br />
     The function: <code> <br />
-    def (B cast) (type B) (S value) ...</code> <br/>
+    def (B cast) (type B) (S value) ...</code> <br/><br/>
     Can be used to convert a value of structural type S into a value of type B, where S is the
     structural supertype of B. (The above
-    function definition is pseudo-code -- "cast" is a primitive) <br />
+    function definition is pseudo-code -- "cast" is a primitive.) <br />
     "Cast" is a necessary evil to declare constructors. E.G: <br /><br />
 <pre>
     type Vector2D
@@ -291,6 +293,7 @@ def print (string in) t
     with the addition of subtypes. Types are elaborated starting from the most general type
     (Any) down to the least subtype that can be proven by the type checker. Mechanism left
     as an exercise to the reader.
+    
 <hr />
 <h6>
 <a href="concur.html">
