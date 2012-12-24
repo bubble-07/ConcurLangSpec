@@ -142,7 +142,7 @@ namespace core
         case a function may be being defined through ad-hoc polymorphism. [see "Types#adhoc"]
         A file's "main" function is where a program begins executing. [more on that later] <br />
 
-        Note: The resolution of namespaces always takes precedence over declaration, which
+        Note: The resolution of names always takes precedence over declaration, which
         is why the declaration above in the "namespace" section would not result in recursive
         namespaces. In all other cases, recursion is permitted with "declare"<br />
         <br />Examples:
@@ -163,42 +163,6 @@ declare main
 decl main
     print x
 decl x 20</pre><code class="smallarrow">&#8594;</code><code>20</code>
-
-    <h3>Import</h3>
-        Syntax: <code>(import <var>module</var>)  OR
-        (import <var>name</var> <var>filepath</var>)</code> <br /><br />
-        "Import" effectively expands the file referenced by "<var>filepath</var>" [a string]
-        into the current source file, but nested inside of namespace "<var>name</var>"[an identifier].
-        With the single-argument form of import, the filename is "<var>module</var>",
-        and the name of the resulting namespace is "<var>name</var>". Modules should
-        be searched for in the directory of the file, the directory for user-specific
-        modules [if applicable], and the directory for system-specific modules [if
-        applicable]. Default search paths are implementation-dependent. However, importing
-        explicitly from a given file path is required to at least support the form
-        "~/dir", where ~ is a placeholder for the current directory. <br />
-        Examples: <br />
-<pre>// in file "messages.cur"
-namespace greetings
-    declare hello "Hello, World!"
-
-// in file "main.cur"
-import messages  //alternatively, import messages "~/messages.cur"
-decl main
-     print messages.greetings.hello
-</pre>
-
-    <h3>Importall</h3>
-        Syntax: (same as import) <br />
-        "Importall" is the same as "import", but instead of packaging everything into
-        the file namespace, everything is unpackaged, which means that top-level
-        definitions in the imported file will be usable without needing to specify that
-        they are from the file. <br />
-        Example (builds off previous example): <br />
-<pre>// in file "main.cur"
-importall messages
-decl main
-     print greetings.hello
-</pre>
 
     <h3>If</h3>
         Syntax:<code> (if <var>condition</var> <var>val<sub>true</sub></var> 
@@ -246,6 +210,9 @@ def (int pow) (int x) (int n)
        1
        x * pow(x, n - 1)
 </pre>
+    <h3>Import</h3>
+        Syntax:<code> (import <var>name</var> <var>library)</var></code> <br /> <br />
+        Synonym for "define <var>name</var> <var>library</var>". 
     <h3>Let</h3>
         Syntax:<code> (let ((<var>param<sub>1</sub></var> <var>val<sub>1</sub></var>) ...)
         <var>body</var>) OR<br /></code>
