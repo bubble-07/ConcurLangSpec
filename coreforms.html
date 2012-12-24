@@ -252,10 +252,8 @@ def (float distance) ((float float) p1) ((float float) p2)
 //note: this is horrendously inefficient, but intuitive
 def (int fibbonaciAt) (int i)
     case
-        i = 0
-            1
-        i = 1
-            1
+        (i = 0) 1
+        (i = 1) 1
         fibbonaciAt(i - 1) + fibbonaciAt(i - 2)
 </pre>
 <hr />
