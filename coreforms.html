@@ -64,15 +64,72 @@
         </code><br />Where "<var>name</var>" is any valid identifier that gives a name
         to the namespace, and each "<var>decl</var>" is any valid declaration <br /> <br />
         A namespace [also known as a module] 
-        consists of a name tagged to a set of declarations. The "namespace"
-        keyword itself forms a declaration, allowing namespaces to be nested. A declaration
-        consists of a name and what it equates to. Every file written in Concur source
-        text is implicitly within a <code>(namespace <var>filename</var>
-        <var>code</var>)</code> block. <br />
-        Members of a namespace [declarations] can be accessed through putting the name of
-        a namespace, followed by a dot, followed by the name of the member. The member can
-        be thought of as actually being a function that takes a namespace as its argument
-        and returns the value of the declaration.
+        consists of a name and a set of declarations. A namespace is actually a declaration
+        in itself, allowing namespaces to be nested within each other. Definitions in innermost
+        namespaces always shadow outer definitions.
+        <br />
+        Every source file written in Concur implicitly forms its own namespace, that is, a
+        file is just a <code>(namespace <var>filename</var>
+        <var>code</var>)</code> declaration, where filename is the name of the file without
+        the file extension.<br />
+
+
+        In fact, Concur takes this concept even further, -- directory trees of
+        source files are actually just nested namespaces in Concur. <br /> <br />
+
+        "Core" is the universal namespace, accessible from any source file.
+        Further, Core will always have "libs" as a sub-namespace, where "libs"
+        is the namespace of all system-and-user-wide libraries. Implementations of
+        Concur may define their own system and user library paths. The "libs" namespace
+        contains the union of all system and user library folders and files, 
+        with conflicts ruled in favor of libraries defined in the user library paths. 
+        Visually, <br />
+<pre>
+namespace core
+   namespace libs
+      namespace library1
+        namepace A
+      namespace library2
+   ...
+</pre> <br />
+        Namespaces are always relative. From the perspective of A, library2 can be accessed
+        using libs.library2, which is conceptually the same as core.libs.library2 [see syntax
+        for potential alternative forms]. In general, namespaces are accessed using
+        <code>(sub-namespace<sub>n</sub> ( ... (root-namespace) ... ))</code>, where the
+        root namespace in question can only be an enclosing namespace of the namespace of
+        the context. [All declarations within a context can be accessed without qualification
+        from within that context]. The "smallest" match is referenced by the root, that is, the
+        innermost namespace with the specified name. Each sub-namespace, or qualification,
+        descends the declaration tree to access the requested members. 
+
+
+        In addition to the "libs" namespace, a special "this" namespace represents the enclosing
+        namespace of the code unit of the namespace context under consideration. 
+        The definition of a code unit depends upon whether the current namespace is within
+        the "core.libs" namespace or not. If the current namespace is within the "core.libs"
+        namespace, then "this" refers to the library's namespace [just within libs]. For example,
+        say you have:
+
+<pre>
+namespace core
+    namespace libs
+        namespace math
+            namespace scalar_ops
+            namespace vector_ops
+</pre>
+        If a function in vector_ops needs, say, addition (+) from scalar_ops, it can access it
+        with <code>this.scalar_ops.+</code> instead of the more lengthy
+        <code>core.libs.math.scalar_ops.+</code> <br /> <br />
+
+        However, if the current namespace is not within the "libs" namespace, then "this"
+        references the innermost enclosing directory/namespace that contains a namespace or
+        declaration called "main".  <br />
+
+        Note: Due to the way names are qualified in Concur, "import" is not necessary.
+        In fact, if we wanted have easy general access to "math" above, we could do
+        <code>declare math core.libs.math</code> 
+    
+
     <h3>Declare</h3>
         Syntax: <code>(declare <var>name</var> <var>value</var>)</code> <br />
         Alias: <code>decl</code> <br /> <br />
@@ -82,8 +139,12 @@
         If multiple declarations exist with the same name, the latest declaration's
         value is what the value actually is, and all other declarations of that name
         may be discarded, with the exception of a value that is a function, in which
-        case a function is being defined through ad-hoc polymorphism. [see "Types#adhoc"]
-        A file's "main" function is where a program begins executing. [more on that later]
+        case a function may be being defined through ad-hoc polymorphism. [see "Types#adhoc"]
+        A file's "main" function is where a program begins executing. [more on that later] <br />
+
+        Note: The resolution of namespaces always takes precedence over declaration, which
+        is why the declaration above in the "namespace" section would not result in recursive
+        namespaces. In all other cases, recursion is permitted with "declare"<br />
         <br />Examples:
 <pre>decl double
      lambda x
@@ -95,7 +156,7 @@ decl main
     namespace greetings
         declare hello "Hello, World!"
 declare main
-    print (hello (greetings messages)) #OR messages.greetings.hello
+    print (hello (greetings (messages this))) #OR this.messages.greetings.hello
 </pre><code class="smallarrow">&#8594;</code><code>"Hello, World!"</code>
 
 <pre>decl x 10
