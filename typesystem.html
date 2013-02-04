@@ -16,284 +16,156 @@
 <h2 class="logoed">
     Overview
 </h2>
-    Concur's type system provides for an interesting hybrid of static type-checking and dynamic typing. Exact type inference for Concur's generalized type system is undecidable if strong normalization is required, so Concur instead has a well-defined limit to what types can be inferred, and it provides two levels of type-safety, "Non-Strict", and "Strict". This approach allows the flexibility of typing in a dynamic language, while still rejecting a large subset of poorly-typed programs. Concur's type system provides subtyping, ad-hoc polymorphism, parametric types and type variables. 
-<hr />
+    Concur's type system expresses a blend of differing ideas, packaged to create a consistent,
+    logical whole. Concur's type system is designed to make it easy for the programmer to extend
+    and generalize -- subtyping, parametric polymorphism, ad-hoc polymorphism in particular
+    help the programmer to develop a good model of the relations between types (not only in code,
+    but also mentally.) 
+<h2 class="logoed">
+    Philosophy/Conceptual Differences From Other Languages
+</h2>
+    In general,types in Concur represent different kinds of
+    possible values and computations (since values are actually computations in Concur under
+    the regime of non-strict evaluation.) This differs significantly from many mainstream
+    languages. For example, it may not be sensible in other languages
+    to say that a "computation that can be proven to terminate" is a type, but in Concur it is.
+    <br />
+    Concur makes it possible to categorize different values/computations into logical
+    groups, expressed by the concept of subtyping. Unlike many object-oriented languages, there
+    is no concept of a "method". Types do not implement methods -- instead, values
+    of types are accepted by functions, or not, depending on whether they fit with the signature
+    or not. This allows functions in Concur to be more powerful than methods, and arguably more
+    powerful (conceptually) than multimethods. <br />
+    In addition to rejecting the notion of a "method", Concur rejects the notion of a "member"
+    of a data structure, which is arguably the most radical departure from mainstream languages.
+    Since values are computations, and functions allow the construction of computations,
+    "members" of data structures are really just the return values of functions with specific
+    names. While Concur's syntax allows the familiar "thing.member" form, this conceptual
+    simplification and generalization allows a flexibility in definition and use of
+    data structures that is unparalleled. 
+<h2 class=logoed">
+   Types
+</h2>
+    Types in Concur belong to two different categories: real and virtual types. Real types
+    are types that will actually find expression as different kinds of values at run-time,
+    and virtual types may be used to express collections of types where the collection does not
+    make sense as a type itself. For example, the type "Any" in Concur expresses the type of all
+    types. [That is, a function accepting an "Any" as a parameter can accept anything] It does
+    not make sense to actually have a value of type "Any", so "Any" is a virtual type. On the
+    other hand, it makes perfect sense to have a value of type "Bool". This distinction between
+    the real and virtual types will be elaborated upon below, where it becomes clear that only
+    supertypes that are real can be distinguished from their subtypes. For now, <br />
+    <code>type <var>A</var></code> defines a real type with the name <var>A</var>, and <br />
+    <code>virtual <var>A</var></code> defines a virtual type. Types are scoped by namespace,
+    just like functions. 
 <h2 class="logoed">
     Subtyping
 </h2>
-    A type <var>B</var> in Concur may be related to a type <var>C</var> in Concur by the
-    relations of subtyping and supertyping. 
-    If <var>A</var> is a subtype of <var>B</var>, then it implies that for every function
-    where <var>B</var> is demanded, <var>A</var> is accepted, as well. For example, 
-    wherever a <code>Num</code> is required as an argument to a function
-    , an <code>Int</code> may be passed instead. Unlike many Object-Oriented
-    languages, Concur does not restrict subtyping to a strict tree [or forest]
-    structure --
-    instead, subtyping in Concur forms a directed graph of relations between types.
-    For example: <br />
-    <object width="512px" height="256px" data="graphs/exgraph.svg" type="image/svg+xml">
-    </object> 
-    <object width="256px" height="256px" data="graphs/diamond.svg" type="image/svg+xml">
-    </object> <br /> 
-    In the above diagrams, arrows lead from supertypes to subtypes. <br /> <br />
-    Concur has a type called "Any" that is the subtype of no types, but is the
-    supertype of all types. A function parameter typed as "Any" may be of any type.
-    It is similar in function to "Object" in other languages. Every new type
-    automatically subtypes Any. <br /><br />
-    You may notice that in the first diagram, Int and Integer are subtypes of each
-    other. Any directed cycle of types in Concur implies that all types connected
-    are actually the same type, but with different names. The same goes for Bool
-    and Boolean -- they both describe the same type [since all functions that
-    accept Bool must also accept Boolean and vice-versa].<br />
-    <h3>Rules of Subtyping</h3>
-    Note: A &sub; B implies that A subtypes B, A = B implies that A and B are equal,
-    A &ne; B implies inequality, and A &lt; &gt; B implies that A and B are disjoint.
-    <br /> <br />
-    <pre>
-A &sub; B   AND   B &sub; C    &#8594;    A &sub; C
-
-
-A &sub; B   AND   B &sub; A    &#8594;    A = B
-
-Corollary: A = B    &#8594;    A &sub; B  AND  B &sub; A
-
-
-A = B   AND   B = C    &#8594;    A = C
-
-A = B    &#8594;    B = A
-
-NOT (A = B)    &#8594;    A &ne; B
-
-NOT (A &sub; B  OR  B &sub; A)    &#8594;    A &lt; &gt; B
-</pre>
-<h3>Syntax</h3>
-These are all declarations that can inhabit a namespace
-<h4>Declaration</h4>
-<code>type <var>A</var></code> <br /> <br />
-Declares that <var>A</var> is a type. All declarations of types in Concur
-are tied to namespaces, and the same scoping rules for function definitions
-apply for types. 
-<h4>Subtyping</h4>
-<code><var>A</var> subtypes <var>B</var></code> <br />
+    In general, the relation of "subtyping" in Concur can be read as "can be accepted as a _ in
+    a function". Syntactically, subtyping is a definition of one of the following three forms:
+<br /><code><var>A</var> subtypes <var>B</var></code> <br />
 <code><var>A</var> subs <var>B</var></code> <br />
 <code><var>A</var> &lt;: <var>B</var></code> <br />
-<br />
-For example, the earlier diamond-shaped graph could be represented as: <br /><br />
-<code>Button &lt;: Rectangle <br />
-Button &lt;: Clickable </code><br />
-<h4>Supertyping</h4>
-<code><var>A</var> supertypes <var>B</var> </code> <br />
-<code><var>A</var> sups <var>B</var> </code> <br />
-<code><var>A</var> :&gt; <var>B</var> </code> <br /> <br />
-Example: <br />
-<code>Number :&gt; Integer </code> 
-<h4>Type Equality</h4>
-<code>typedef <var>A</var> <var>B</var> </code> <br /> <br />
-Example: <br />
-<code>typedef Int Integer</code>
-<h3>Requirements</h3>
-    Concur actually specifies two different levels of type-strictness.
-    The first level only rejects programs that "cannot possibly be" typed
-    correctly, and the second level rejects any program that cannot be
-    proved to be typed correctly at compile-time. Implementations are
-    required to provide both levels of strictness.
-    <h4>Non-Strict Concur</h4>
-    In Non-Strict mode, a typing error arises iff a function's accepted
-    argument type is disjoint from the recieved argument's type. This enforces
-    that programs that are "obviously typed incorrectly" are rejected by
-    the type-checker -- for example, a function typed as requiring a Bool
-    for its first argument cannot be passed something that is definitely
-    an Int [at compile-time], or a type error will be raised [at compile-time].
-    However, something requiring a Bool may accept an "Any" in non-strict mode,
-    because at compile-time, it is impossible to determine whether the contents
-    of the argument provided are actually a Bool or something else. At run-time
-    when the argument is actually evaluated, a type-error will arise if the
-    argument turns out to not be a Bool. 
-    <h4>Strict Concur</h4>
-    In Strict Concur, a
-    compile-time type error arises wherever a function requires an argument
-    of type <var>A</var>, but the provided argument <var>B</var> cannot be
-    proven to be a subtype of A. The requirements of the method for
-    proving subtyping are provided in a later section. Under the Strict
-    variant, a function accepting an Int cannot be provided an argument typed
-    as "Any". Run-time type errors are still possible in Strict Concur, but
-    they have to be explicitly defined by the user [see below]. 
-<h2 class="logoed">Parametric Types</h2>
-    A parametric type is a type that depends on the types it is parametized with.
-    An example of a parametric type would be a list of elements of some defined type, or
-    <code>listof <var>A</var></code>, where <var>A</var> is the type of each
-    element. Just like regular types, parametric types may be subtypes or supertypes to
-    other types. For example: <br /><br />
-    <code> typedef (listof Any) list </code><br /><br />
-    We will use "parametric container" to refer to the container (the "t" in "t a"), and
-    "parameterized type" to refer to complete parametric types ("t a"). <br /> 
-
-    Parametric containers are syntactically similar to functions -- 
-    they are always reordered to be the first item in an S-expression. They may also be
-    nested as function applications would.<br />
-    Parametric types can be declared using "type", but with the name of the parametric
-    container coming first, followed by the domain that each parameter can take on. <br /><br />
-    Examples: <br />
-    <code>type Vector2D Number //Ex: Vector2D(Float) and Vector2D(Int)</code> <br />
-    <code>type Dict Hashable Any </code> <br /> <br />
-    It is a type error if a parametric type is instantiated with parameters outside of
-    the specified domains. <br />
-<h2 class="logoed">Type Variables</h2>
-    <h3>In subtyping relations</h3>
-    Type variables are "placeholders" for a type. A type variable may be any
-    valid identifier that is not already used as a type or as a function.
-    Type variables are useful for specifying universal relations between types.
-    <br /><br />For example: <br />
-    <code>Any :&gt; A  //for every type A.</code> <br /><br />
-    In Concur, the "for every" is implied. In addition, with a type
-    variable, it is possible to express general subtyping relations of parametric types.
-    <br /><br />For example: <br />
-    <code>Termin A &lt;: A</code><br /><br />
-    "Termin" is a parametric type that expresses "provable termination" --
-    Since values in Concur are actually computations 
-    [See <a href="evaluation.html">Evaluation</a>], it is possible to give
-    a value a type parameterized with "Termin" to express that the computation
-    can be proven to terminate. "Termin" does not claim to capture all terminating
-    computations, as that would solve the halting problem -- instead, it is a
-    convenience type that allows programmers to partially reason about termination,
-    and it could potentially help a compiler/interpreter make smarter decisions about
-    code. To understand the above declaration, try substituting "Int" for "A". <br />
-    <br /><code>Termin Int &lt;: Int</code><br /><br />
-    This reads as "wherever an Int is accepted, a Termin Int is accepted as well".
-    However, the relation does not go the other way by design -- if a terminating
-    computation that returns an Int is required, it is required, and a type error
-    will be yielded if one is not provided.  
-    <h4>Rules</h4>
-    As of v1.0, it is illegal to provide anything other than a type variable
-    to a parametric type in a subtyping relation [for the sake of simplicity] -- the subtyping
-    constraint must be universal across all type parameters. <br />
-    <br />Example: <br />
-    <code>Either A B :&gt; A</code><br />
-    <code>Either A B :&gt; B</code><br /> <br />
-    The above parametric type would express the type of 
-    something that could be of either type A or of type B
-    -- for example, "Either Num String" means both <code>Either Num String :&gt; Num</code> and
-    <code>Either Num String :&gt; String</code>. However, these are not valid as subtyping
-    relations by themselves, because they do not express relations over the whole domain of
-    <code>Either A B</code>
-
-    <h3>In function definitions</h3>
-    Type variables may also appear in function definitions. For example, let's say we want to
-    define the identity function in Concur. The simple way to do this would be: <br />
-<pre>def identity x
-    x</pre> <br />
-    How would we express the type of this function? Functions in Concur from type <var>A</var>
-    to type <var>B</var> are expressed by <code><var>A</var> -&gt; <var>B</var></code> .
-    Since the identity function simply returns its argument, its type must be 
-    <code>A -&gt; A</code>. If we want to explicitly state this in the function definition,
-    we can say: <br />
-<pre>def (A identity) (A x)
-    x</pre> <br /> Provided that A is a valid type variable, the above will work as intended.
-    Using type variables, we can express parametric polymorphism. Another example would be
-    <code>map :: (A -&gt; B) -&gt; (collectionof(A) -&gt; collectionof(B))</code>, where "::"
-    reads as "is typed as".
-    (this is actually a function of two arguments. See currying.)
-<h2 class="logoed">Ad-hoc Polymorphism</h2>
-    Ad-hoc polymorphism in Concur allows a function to accept multiple different types,
-    and select the function body for the correct type. This makes it possible for functions
-    like "print" to be able to work over a wide range of types. For example, <br />
-<pre>def print (float in) t
-    //definition goes here
-
-def print (int in) t
-    //yet another definition
-
-def print (string in) t
-    //... and so on</pre><br />
-
-    Ad-hoc polymorphism also allows for subtypes to mimic object-oriented inheritance-based
-    polymorphism -- for example, let's say that we have: <br />
-<pre>def draw (Enemy in) t
-    //definition goes here</pre> <br />
-    as a method to draw a generic enemy, and we want to specialize that for a new type that
-    subtypes enemy, let's call it HugeEnemy. In order to change the behavior of draw for a
-    HugeEnemy, all we have to do is: <br />
-<pre>def draw (HugeEnemy in) t
-    //definition goes here</pre> <br />
-    And if we wanted Enemy's draw function to mimic a pure virtual method in other languages,
-    all we have to do is change the first definition to: <br />
-<pre>def draw (Enemy in) t
-    virtual</pre> <br />
-    virtual is of type "error", so an error will be raised if a subtype of Enemy tries
-    to pass itself to draw, and a subtype-specific definition does not exist. 
-    Note: In Concur, it is illegal to define two functions with names and
-    type signatures that are exactly the same.
-    <br /> <br />
-    <h3>Selection</h3>
-    In general, ad-hoc polymorphic functions have their applications determined in a
-    left-to-right, most-specific-to-least-specific order of precedence. Left-to-right order
-    is due to the fact that every function in Concur is curried -- for example, let's say that
-    you have a function <code>f</code> that has two definitions, one of which is typed as
-    <code>f :: Num -&gt; (Int -&gt; Bool)</code> and the other of which is typed as
-    <code>f :: Int -&gt; (Num -&gt; Bool)</code> -- If we were to supply two Ints to the
-    function, the second option would be selected, because it is more specific in the
-    leftmost argument. A is more specific than B if A is a subtype of B. 
-
-    <h3>The type of ad-hoc polymorphic functions</h3>
-    Ad-hoc polymorphic functions take on the type:<br />
-    <code>type Poly function function</code> <br /><br />
-    and the rules:<br />
-    <code>Poly A B &lt;: function</code><br />
-    <code>Poly A B &lt;: A</code><br />
-    <code>Poly A B &lt;: B</code><br /><br />
-    These constraints allow higher-order polymorphic functions to work as intended. 
-    For polymorphic
-    functions with more than two ad-hoc definitions, "Poly" types nested from left-to-right
-    may be used. E.G: <code>Poly A (Poly B (Poly C D))</code>
-    where A, B, C, and D are function types.
-<hr/>
-
-<h2 class="logoed">Structural Types</h2>
-    Structural types are used to specify how types are stored in memory. In general, if
-    A is a type, and S is a structural type, then A is stored as the structure S represents
-    in memory if A is a subtype of S. It is a type error for a type to subtype more than one
-    structural type. <br />
-<h2>Structural Type Primitives</h2>
-    There exist only four structural type primitives in Concur, from which all other structural
-    types are derived.
-    <h3>Byte</h3>
-        Represents a single byte (sequence of eight bits). Similar to "char" in C.
-    <h3>Pair A B</h3>
-        Represents storage representing type A followed by storage representing type B.
-    <h3>ArrayOf N A</h3>
-        Represents contiguous storage of N items of type A. Follows the definition: <br />
-        <br /><code>type ArrayOf(tNum, A)</code> <br /><br />
-        Where "tNum" is a supertype of integer literals implicitly lifted to the
-        type level (shh, don't tell Haskell!). If N is declared as "tNum", the array may
-        have any arbitrary number of elements<br /><br />
-        For example: <br />
-        <code>Arrayof(tNum, Char) //Could represent a string of arbitrary length</code> <br />
-        <code>ArrayOf(100, Char) //Could represent a fixed-width string of 100 characters</code>
-        <br />
-        <code>ArrayOf(100, ArrayOf(100, Float)) //Could represent a 2D matrix of floats.</code>
-    <h3>-&gt; A B</h3>
-        Functions are technically structural types.
-<h2 class="logoed">Type Casting</h2>
-    Structural types may be cast to become one of their subtypes. <br /><br />
-    The function: <code> <br />
-    def (B cast) (type B) (S value) ...</code> <br/><br/>
-    Can be used to convert a value of structural type S into a value of type B, where S is the
-    structural supertype of B. (The above
-    function definition is pseudo-code -- "cast" is a primitive.) <br />
-    "Cast" is a necessary evil to declare constructors. E.G: <br /><br />
+    All of the above forms are equivalent. In addition, three more forms are provided for
+    convenience: <br />
+<code><var>A</var> supertypes <var>B</var></code> <br />
+<code><var>A</var> sups <var>B</var></code> <br />
+<code><var>A</var> :&gt; <var>B</var></code> <br />
+    The three forms above are equivalent to each other and to <code><var>B</var> subs
+    <var>A</var></code>. <br />
+    Technically, all of the forms above do not form some special "infix exception" to the
+    syntax. Rather, all of the above forms behave as "type-level operators" that are subject
+    to the same reordering that functions have. For example, 
+<code><var>A</var> subs <var>B</var></code> <br />
+is reordered to
+<code>subs <var>A</var> <var>B</var></code>
+, but it is more idiomatic to use an infix notation. <br /> <br />
+Syntactic quibbles aside, the subtyping relation above means that <var>A</var> can be used in
+any function as a substitute for any parameter with a declared type of <var>B</var>. That's all.
+<h2>
+    Functions
+</h2>
+    Okay, I lied -- there is a lot more to subtyping, even though the above description is a
+    good ideological summary statement. <br />
+    Recall that functions are defined using "def", of the form: <br />
 <pre>
-    type Vector2D
-    Vector2D subs Pair(Int, Int)
-    def (Vector2D makeVector2D) (Int x) (Int y)
-        cast Vector2D cons(x, y)
+def (<var>returntype</var> <var>functionname</var>) (<var>paramtype<sub>1</sub></var> <var>paramname<sub>1</sub></var>) ...
+    <var>implementation</var>
 </pre>
+    From now on, the partial type signatures of functions as defined with "def" will be written
+    as <code>(<var>returntype</var> <var>functionname</var>) <var>paramtype<sub>1</sub></var> ...
+    </code> for convenience. [Where we don't care about the return type, it will be omitted
+    along with the parens around the function name.]
+    Concur supports ad-hoc polymorphism -- that is, multiple definitions may exist under the
+    same function, so long as different types are accepted as parameters. Then, when the
+    function is used, the implementation is selected based on the types of the parameters
+    passed to it, in a left-to-right, specific-to-general order of precedence. 
+    That is, say there exists a <code>F Any Int</code> and a <code>F Int Int</code>. The
+    implementation for the definition of F with the second type signature will be called
+    if the first argument passed is "Int", because Int is a subtype of Any, and parameters
+    are passed left-to-right. Concur's type checker shouldn't care what the return type is
+    as a general rule. The dispatching of a function depends on the parameters passed
+    and nothing more. As a consequence, it is ambiguous to define two different implementations
+    of a function with the declared types of the parameters equivalent where both implementations
+    exist as part of the same namespace. <br />
+<h3>NotImplemented</h3>
+    Another way to look at the statements made above is to say that the existence of a function
+    implementation for more general types requires that the same function applies to more
+    specific types [subtypes of the general types]. This insight makes functions with
+    "NotImplemented", or "NOP" as the implementation body make more sense -- "NotImplemented" 
+    allows a programmer to define a general operation involving a general type, leaving the 
+    specifics of implementation to specific types. For example, in a GUI library, "draw" might 
+    have "NOP" as the body for the implementation of signature <code>Draw Drawable</code>. 
+    However, "NOP" is special -- it belongs to NO TYPE, not even Any.
+    What that means is that any time
+    that NOP has the potential to be the return value of a function used in a program, 
+    a type error is raised. By doing this, "NOP" allows a programmer to REQUIRE implementations
+    of a function that operate upon more specific parameters than the declaration with NOP,
+    which accomplishes a function similar to "virtual methods" in other languages. <br />
+<h3>Return types</h3>
+    A function may also have a return type that is a supertype of other types -- what this
+    actually means is that the return type of the function at run-time may actually be any
+    type that is a subtype of the declared return type, or in the case of a real return type,
+    the type itself or anything that subtypes it. Because of this distinction between return
+    types declared at compile-time and and actual return types at run-time, many other languages
+    with a similar subtyping mechanism are split into "statically typed" and "dynamically typed"
+    camps. The line is blurred a bit in Concur -- by default, types are statically checked, with
+    the requirement that all parameters passed into functions have declared types that are
+    guaranteed to be subtypes of the required parameter types. However, Concur implementations
+    are REQUIRED to have an option to defer such checking to runtime in any case that a passed
+    parameter COULD possibly fit with the type signature of the function. [Impossible cases will
+    still be rejected statically.]
+<h3>Virtual/Real distinction</h3>
+    As mentioned earlier, types can be either virtual or real. In reality, the only difference
+    between virtual and real types in Concur is that at run-time, any value that has a virtual
+    type [as declared before run-time] MUST be of a type that is a subtype of the virtual type.
+    With a real type, this does not necessarily need to be true. This is very relevant for
+    type inference in Concur, because a virtual type is essentially equivalent to the set of
+    all of its subtypes, but a real type is equivalent to the set of all of its subtypes with
+    itself as an addition. Since determining whether a type is a subtype of another is actually
+    reduced to determining whether a set of types is a subset of another, a virtual type with
+    only one subtype is equivalent to that subtype.
+<h2 class="logoed">
+   Type Variables
+</h2>
+    In place of any declared parameter type for a function, a type variable may be used instead.
+    A type variable can have any name that does not name a defined type, and a type variable
+    will accept any type [in the trivial case]. However, the type of the leftmost 
+    parameter passed to the function [in the location of a type variable] will define the
+    type required for any further
+    occurrences of the type variable [to the right or in the return type]. 
+    For an example, consider the type of "id",
+    the identity function: <code>(A id) A</code> -- since "id" is the identity function, and
+    it returns whatever input it takes unchanged, its return type must match the passed parameter
+    type, no matter what it is. A type variable allows the expression of this concept. 
+<h2 class="logoed">
+    Parametric Types
+</h2>
+    The example of the identity function above should seem a little contrived, because it is.
+    In reality, type variables find most of their power when used in conjunction with parametric
+    types. 
 
-<h2 class="logoed">Type Checking and Inference</h2>
-    Type inference may be performed using the same mechanism as Hindley-Milner,
-    with the addition of subtypes. Types are elaborated starting from the most general type
-    (Any) down to the least subtype that can be proven by the type checker. Mechanism left
-    as an exercise to the reader.
-    
+
 <hr />
 <h6>
 <a href="concur.html">
