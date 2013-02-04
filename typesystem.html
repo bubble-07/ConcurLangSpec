@@ -145,6 +145,9 @@ def (<var>returntype</var> <var>functionname</var>) (<var>paramtype<sub>1</sub><
     itself as an addition. Since determining whether a type is a subtype of another is actually
     reduced to determining whether a set of types is a subset of another, a virtual type with
     only one subtype is equivalent to that subtype.
+<h3>Circular Equivalence</h3>
+    If a type subtypes another type, and that subtype has the original type as a subtype, then
+    the two types are equivalent. [Apply recursively.]
 <h2 class="logoed">
    Type Variables
 </h2>
@@ -163,8 +166,38 @@ def (<var>returntype</var> <var>functionname</var>) (<var>paramtype<sub>1</sub><
 </h2>
     The example of the identity function above should seem a little contrived, because it is.
     In reality, type variables find most of their power when used in conjunction with parametric
-    types. 
-
+    types. A parametric type is declared in exactly the same way that a regular type is declared,
+    and it similarly may be either real or virtual. However, in the type declaration, types of
+    <i>type parameters</i> may be defined as well. <br />
+    Delcarations for parametric types are of the form: <br />
+    <code>type (<var>name</var> <var>paramtype<sub>1</sub></var> ...)</code> OR
+    <code>virtual (<var>name</var> <var>paramtype<sub>1</sub></var> ...)</code> <br />
+    Where "name" is the name of the parametric type, and all of the "paramtypes" declare what
+    the parameters of a parametric type must subtype (or be equivalent to). <br />
+<h3>Inherent Subtypes</h3>
+    An example of a parametric type is <code>type listof(Any)</code>, which expresses a list
+    parametized over any type. Instances of this parametric type may include listof(Int), 
+    listof(Bool), etc. In general, a parametric type that is more specific in one or more
+    type parameters [and the same in others] is a subtype of a more general parametric type.
+    [That is, listof(Bool) subtypes listof(Any).] <br />
+    Parametric types give significantly more power to Concur -- for example, the type of "map"
+    can be defined as <code>(listof(B) map) (A -&gt; B) listof(A)</code> [A -&gt; B defines
+    the type of a function that accepts A and returns B.] <br />
+<h3>Parametric Bounding</h3>
+    Since the parameters of a parametric type are bounded by the types in the declaration
+    of that specific type, any type variables appearing in a function definition in the place
+    of that parameter are also bounded by the same constraint. <br />
+<h3>In Subtypes</h3>
+    Parametric types may also be used in subtype declarations. For example, it is sensible to
+    say that the type of a provably terminating computation of a given type is a subtype of a 
+    regular computation of a given type. Expressed as a declaration,
+<pre>
+type Termin(Any)
+Termin(A) subs A
+</pre>
+    No restrictions are placed upon the occurrence of parametric types in subtype declarations
+    beyond being syntactically valid [and having all of their parameters filled in some way
+    shape or form.]
 
 <hr />
 <h6>
