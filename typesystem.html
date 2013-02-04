@@ -195,10 +195,8 @@ def (<var>returntype</var> <var>functionname</var>) (<var>paramtype<sub>1</sub><
 type Termin(Any)
 Termin(A) subs A
 </pre>
-    No restrictions are placed upon the occurrence of parametric types in subtype declarations
-    beyond being syntactically valid [and having all of their parameters filled in some way
-    shape or form.]
-
+    In subtype declarations, it is a type error if a parametric type has anything other than
+    a type variable [or the most general type of the parameter] for each parameter. 
 <hr />
 <h6>
 <a href="concur.html">
